@@ -1,0 +1,17 @@
+## These are the patterns to match Egress's section 4 logs - for any questions ask AJ
+
+SQL_GEN %{TIMESTAMP_ISO8601:date} \+00\:00 \[\{ Id: %{INT:code_id} \}\] \[%{DATA:level}\] %{GREEDYDATA:code_msg}
+CODE_3 \[%{DATA:src_api}\] %{GREEDYDATA:code_event}.
+CODE_1101 \[%{DATA:src_api}\] Creating new organization name:\[\"%{DATA:new_org_name}\"\] parentId:\[\"%{DATA:parent_id}\"\]
+CODE_1022 \[%{DATA:src_api}\] %{DATA:code_event} UID:\[\"%{DATA:uid}\"\].|\[%{DATA:src_api}\] %{DATA:code_event} OrgCode:\[\"%{DATA:org_code}\"\].
+CODE_1039 \[%{DATA:src_api}\] %{DATA:code_event}. Uid:\[\"%{DATA:uid}\"\]\. OrgCode:\[\"%{DATA:org_code}\"\].
+CODE_1049 \[%{DATA:src_api}\] %{DATA:code_event} uid:\[\"%{DATA:uid}\"\] orgid:\[\"%{DATA:org_id}\"\] reason:\[\"%{DATA:reason}\"\]
+CODE_1056 \[%{DATA:src_api}\] %{DATA:code_event}. AdminUid:\[\"%{DATA:admin_uid}\"\]. OrgId:\[\"%{DATA:org_id}\"\]. OrgName:\[\"%{DATA:org_name}\"\]. UserAction:\[\"%{DATA:user_action}\"\]. NewUserOrgId:\[\"%{DATA:new_user_org_id}\"\]. PreviousOrgStatus:\[\"%{DATA:previous_org_status}\"\].
+CODE_1058 \[%{DATA:src_api}\] %{DATA:code_event}. Uid:\[\"%{DATA:uid}\"\]\. NewUserType:\[%{DATA:new_user_type}\]. CurrentUserType:\[%{DATA:org_admin}\]\.
+CODE_1141 \[%{DATA:src_api}\] %{DATA:code_event}. OrgId:\[\"%{DATA:org_id}\"\], Uid:\[\"%{DATA:uid}\"\]
+CODE_1178 \[%{DATA:src_api}\] %{DATA:code_event}. OrgCode:\[\"%{DATA:mfa}\"\]\. PropertyName:\[\"%{DATA:property_name}\"\]. OldValue:\[\"%{DATA:old_value}\"\]. NewValue:\[\"%{DATA:new_value}\"\].
+CODE_5008 \[%{DATA:src_api}\] %{DATA:code_event}\[\"%{DATA:old_org}\"\] to \[\"%{DATA:new_org}\"\]
+CODE_5010 \[%{DATA:src_api}\] %{DATA:code_event}. OrgId:\[\"%{DATA:org_id}\"\].
+CODE_5011 \[%{DATA:src_api}\] %{DATA:code_event}. OrgId:\[\"%{DATA:org_id}\"\]. Reason:\[\"%{DATA:reason}\"\].
+CODE_5014 \[%{DATA:src_api}\] %{DATA:code_event}. OrgId:\[\"%{DATA:org_id}\"\]. UserUpn:\[\"%{DATA:user_upn}\"\]. Reason:\[\"%{DATA:reason}\"\].
+CODE_5078 \[%{DATA:src_api}\] %{DATA:code_event}. OrgID: \[\"%{DATA:org_id}\"\], NewName: \[\"%{DATA:new_name}\"\]

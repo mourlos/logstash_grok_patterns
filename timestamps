@@ -1,0 +1,13 @@
+###Various timestamp formats
+
+ALDERMORE %{ODDONE}|%{NORMALONE}
+ODDONE <%{INT>%{CISCOTIMESTAMP}: %%{DATA:cisco_log_id}:
+NORMALONE <%{INT}>%%{DATA:cisco_log_id}:
+CISCOTIMESTAMP %{MONTH} +%{MONTHDAY}(?: %{YEAR})? %{TIME}
+ALLTOGETHER %{OLDONE}|%{NEWONE}
+OLDONE (?:%{CISCOTIMESTAMP:syslog_timestamp}|%{SYSLOGTIMESTAMP:syslog_timestamp}|%{TIMESTAMP_ISO8601:syslog_timestamp}|%{INT:syslog_timestamp}) %{SYSLOGHOST} %{DATA:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}
+NEWONE (?:%{CISCOTIMESTAMP:syslog_timestamp}:|%{SYSLOGTIMESTAMP:syslog_timestamp}|%{TIMESTAMP_ISO8601:syslog_timestamp}|%{INT:syslog_timestamp}) %{GREEDYDATA:syslog_message}
+CISCOTIMESTAMP %{MONTH} +%{MONTHDAY}(?: %{YEAR})? %{TIME}
+
+##IPS related
+IPS_DATE %{DAY} %{MONTH} ?%{SPACE}%{MONTHDAY} %{TIME} %{YEAR} %{TZ}

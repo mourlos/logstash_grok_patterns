@@ -1,0 +1,21 @@
+###This file contains patterns for the syslog_message
+###that is originating from puppet. It is based on the most
+###common events so far, so there might be need to add more.
+
+##What will be callewd by the filter (PUPPET)
+PUPPET %{COMPILE}|%{SCOPE1}|%{SCOPE2}|%{REPEATED}|%{MESSAGE}
+
+##Syslog_messge starts with compile catalog...##
+COMPILE %{GREEDYDATA} for %{HOSTNAME:compiled_for} in environment %{WORD:environment} in %{NUMBER:seconds} seconds
+
+##syslog_message start with (Scope(Class..##
+SCOPE1 \(%{DATA}\(%{DATA}\[%{DATA:from}\]\)\) %{GREEDYDATA:msg} '%{DATA:variable}'; %{WORD} %{GREEDYDATA:reason}
+
+##syslog_message start with (Scope(Class..##
+SCOPE2 \(%{DATA}\(%{DATA}\[%{DATA:from}\]\)\) %{DATA:from} %{GREEDYDATA:reason}.
+
+##repetion of the same message##
+REPEATED message repeated %{INT:repeated} times: \[ %{GREEDYDATA:msg}\]
+
+##Pretty useless pattern, but it is better to have the same name on the fields on puppet logs##
+MESSAGE %{GREEDYDATA:msg}

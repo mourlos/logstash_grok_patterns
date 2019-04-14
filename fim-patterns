@@ -1,0 +1,32 @@
+##The following patterns will be used in order to make the parsing of logs coming form FIM server easier and faster##
+###Complementary patterns for the rest of the patterns
+LEVEL crit|inf|warn|info|
+ORIGIN \/%{DATA:origin}"|\'%{DATA}\->%{IP}\'."|\'%{DATA:origin}\'."
+WINDOWS \'%{DATA}\->%{IP}\'."
+OSSEC ossec: %{GREEDYDATA:message} %{ORIGIN}
+
+###When there is a change in the checksum
+CHANGES Integrity checksum changed for: '%{DATA:checksum_changed}'","file":"%{DATA:file}","md5_old":"'%{DATA:old_md5}'","md5_new":"'%{DATA:new_md5}'","sha1_old":"'%{DATA:old_sha1}'","sha1_new":"'%{DATA:new_sha1}'"
+
+###FIM logs related to number of logs
+LOGS The average number of logs between %{DATA:start_time} and %{DATA:end_time} is %{INT:number_of_logs}. We reached %{INT:total_number_of_logs}.","acct":"\(%{DATA:user}\)"
+
+###Logs related to file permissions
+PERMISSIONS File '%{DATA:location}' is owned by %{DATA:owner} and has written permissions to %{DATA:write_permission}."
+
+###Logs related to host anomaly detection
+DETECTION Host-based anomaly detection event (rootcheck).  Process %{INT:process_id} hidden from %{DATA:process}. Possible kernel level rootkit.
+
+###Different conditions for different messages
+VALUE %{OSSEC}|%{CHANGES}|%{LOGS}|%{PERMISSIONS}|%{DETECTION}
+
+###Puppet Bug
+PUPPET_BUG \(/%{GREEDYDATA:useless}::Service/Service\[%{WORD:main_service}\]/%{WORD:serivce}\) %{GREEDYDATA:msg}
+
+##THese are the patterns for the main eventes, where FREQUENCY calls them
+FREQUENCY %{MOST}|%{LESS}
+MOST \{\"%{LEVEL:level}\":%{INT:severity},"id":%{INT},"component":"\(%{DATA:src_host}\) %{IP:src_ip}->%{DATA:run}","classification":" %{DATA:category},","description":"%{GREEDYDATA:event}.","message":"%{VALUE}\}
+LESS \{\"%{WORD:level}\":%{INT:severity},"id":%{INT},"component":"%{DATA:src_host}->%{DATA:run}","classification":" %{DATA:category},","description":"%{GREEDYDATA:event}.","message":"%{DATA}: '%{DATA:event_src}'."
+
+###Actual FIM logs patterns
+OSSEC_EVENTS %{FREQUENCY} 

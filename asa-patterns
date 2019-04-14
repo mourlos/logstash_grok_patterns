@@ -1,0 +1,485 @@
+# Common Particles
+CISCO_ASA_ACTION Built|Teardown|Deny|Denied|denied|requested|permitted|received|denied by ACL|discarded|est-allowed|Dropping|dropping|created|deleted|SENDING|RECEIVED|monitored|dropped|terminated|Rejected
+CISCO_ASA_REASON AAA failure|Duplicate TCP SYN|TCP Reset\-O|Failed to locate %{WORD} interface|Invalid transport field|No matching connection|DNS Response|DNS Query|(?:%{WORD}\s*)*
+CISCO_ASA_DIRECTION Inbound|inbound|Outbound|outbound
+CISCO_ASA_INTERVAL first hit|%{INT}-second interval
+CISCO_ASA_XLATE_TYPE static|dynamic
+
+
+# ASA-6-302013: TCP created between 2 hosts
+# ASA-6-302014: TCP deleted between 2 hosts
+# ASA-6-302015: UDP created between 2 hosts
+# ASA-6-302016: UDP deleted between 2 hosts
+ASA_6_302013 %{CISCO_ASA_ACTION:action}(?: %{CISCO_ASA_DIRECTION:direction})? %{WORD:protocol} connection %{INT:connection_id} for %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port}( \(%{IPORHOST:src_mapped_ip}/%{INT:src_mapped_port}\))?(\(%{DATA:src_user}\))? to %{DATA:dst_interface}:%{IPORHOST:dst_ip}/%{INT:dst_port}( \(%{IPORHOST:dst_mapped_ip}/%{INT:dst_mapped_port}\))?(\(%{DATA:dst_user}\))?( duration %{TIME:duration} bytes %{INT:bytes})?(?: %{CISCO_ASA_REASON:reason})?( \(%{DATA:user}\))?
+
+# ASA-1-106021: Attack in progress
+ASA_1_106021 %{WORD:action} %{WORD:protocol} reverse path check from %{IP:src_ip} to %{IP:dst_ip} on interface %{DATA:src_interface}
+
+# ASA-4-106023: Potential Port Scan attempt
+ASA_4_106023 %{CISCO_ASA_ACTION:action} %{DATA:protocol} src %{DATA:src_interface}:%{IPORHOST:src_ip}(/%{INT:src_port})?(\(%{DATA:src_user}\))? dst %{DATA:dst_interface}:%{IPORHOST:dst_ip}(/%{INT:dst_port})?(\(%{DATA:dst_user}\))?( \(type %{INT:icmp_type}, code %{INT:icmp_code}\))? by access-group "%{DATA:policy_id}" \[%{DATA:hashcode1}, %{DATA:hashcode2}\]
+
+# ASA-6-602303: IPSec Inbound Connection is Created 
+ASA_6_602303 %{WORD:protocol}: An %{CISCO_ASA_DIRECTION:direction} %{GREEDYDATA:tunnel_type} SA \(SPI= %{DATA:spi}\) between %{IP:src_ip} and %{IP:dst_ip} \(user= %{DATA:user}\) has been %{CISCO_ASA_ACTION:action}
+
+# ASA-3-710003: TCP access denied
+ASA_3_710003 %{WORD:protocol} access %{WORD:action} by ACL from %{IP:src_ip}/%{DATA:src_port} to %{DATA:dst_interface}:%{IP:dst_ip}/%{WORD:dst_port}
+
+# ASA-3-313001: Denied ICPM Packet
+ASA_3_313001 %{WORD:action} %{WORD:protocol} type=%{INT:icmp_type}, code=%{INT:icmp_code} from %{IP:src_ip} on interface %{DATA:interface}( to %{IP:dst_ip})?
+
+##### Adermore ASA signatures for VPN Logon/Logoff and Failed attempts
+# ASA-4-722037 An SVC connection was terminated for the given reason.
+ASA_4_722037 Group <%{GREEDYDATA:group}> User <%{DATA:user}> IP <%{IP:src_ip}> %{DATA:vpn_action}: %{GREEDYDATA:reason}.
+
+# ASA-5-611103 The specified user logged out.
+ASA_5_611103 %{GREEDYDATA:user_action}: %{DATA}: %{GREEDYDATA:user}
+
+# ASA-5-722010 The SVC issued a message.
+# ASA-5-722012 The SVC issued a message.
+ASA_5_722010 Group <%{DATA:group}> User <%{DATA:user}> IP <%{IP:src_ip}> SVC Message: %{DATA:event_code}\/%{DATA:event_type}: %{GREEDYDATA:event}
+# ASA-5-722028 An unused SVC connection was closed.
+ASA_5_722028 Group <%{DATA:group}> User <%{DATA:user}> IP <%{IP:src_ip}> %{GREEDYDATA:event}
+
+# ASA-6-605005 A user was authenticated successfully, and a management session started
+ASA_6_605005 Login permitted from %{IP:src_ip}/%{INT:src_port} to %{DATA:interface}:%{IP:dst_ip}/%{DATA:service} for user "%{DATA:user}"|Login permitted from serial to console for user "%{DATA:user}"
+
+# ASA-6-113039 The AnyConnect session has started for the user in this group at the specified IP address.
+ASA_6_113039 Group <%{DATA:group} User <%{DATA:user}> IP <%{IP:src_ip}> %{GREEDYDATA:event}
+
+# ASA-6-113005 The AAA authentication on a connection has failed.
+ASA_6_113005 AAA user authentication %{CISCO_ASA_ACTION:action} : reason = %{GREEDYDATA:reason} : server = %{IPORHOST:server} : user = %{USERNAME:user} ?(: user IP = %{IP:src_ip})?
+
+#ASA-6-305012 - The address translation slot was deleted.
+ASA_6_305012 %{WORD:action} %{DATA:state} %{DATA:protocol} translation from %{DATA:src_interface_name}:%{IP:src_ip}/%{INT:src_port}(%{DATA:user}) to %{WORD:dst_interface_name}:%{IP:dst_ip}/%{INT:dst_port} duration %{GREEDYDATA:duration}
+
+###Added on Monday 19-12-2016
+########### 1st ################
+#ASA-6-106015 - The ASA discarded a TCP packet that has no associated connection in the ASA connection table. 
+ASA_6_106015 %{WORD:action} %{DATA:protocol} \(no connection\) from %{IP:src_ip}/%{DATA:src_port} to %{IP:dst_ip}/%{DATA:dst_port} flags %{DATA:flags}  on interface %{WORD:interface}
+
+#ASA-6-305012 - The address translation slot was deleted.
+###Duplicate####ASA_6_305012 %{WORD:action} %{DATA:state} %{DATA:protocol} translation from %{DATA:src_location}:%{IP:src_ip}/%{DATA:src_port}(%{DATA:user}) to %{DATA:dst_location}:%{IP:dst_ip}/%{DATA:dst_port} %{GREEDYDATA:location}
+
+#ASA-6-302021 - An ICMP session is removed in the fast-path when stateful ICMP is enabled using the inspect icmp command.
+ASA_6_302021 %{WORD:action} %{DATA:protocol} connection for faddr %{IP:dst_ip}/%{DATA:foreign_port} gaddr %{IP:gobal_ip}/%{DATA:global_port} laddr %{IP:local_ip}/%{DATA:local_port}
+
+#ASA-4-106023 - real IP packet was denied by the ACL
+##Duplicate##ASA_4_106023 %{WORD:action} %{DATA:protocol} src %{WORD:src_interface_name}:%{IP:src_ip}/%{DATA:src_port}%{DATA:user} dst %{WORD:dst_interface_name}:%{IP:dst_ip}/%{DATA:dst_port} by access-group "%{DATA:policy_id}" \[%{DATA:hashcode1}, %{DATA:hashcode2}\]
+
+#ASA-6-302020 - An ICMP session was established in the fast-path when stateful ICMP was enabled using the inspect icmp command.
+ASA_6_302020 %{WORD:action} %{WORD:icmp_type} %{DATA:protocol} connection for faddr %{IP:dst_ip}/%{DATA:foreign_port} gaddr %{IP:gobal_ip}/%{DATA:global_port} laddr %{IP:local_ip}/%{DATA:local_port}
+
+#ASA-6-305012 - The address translation slot was deleted.
+####Troplicate####ASA_6_305012 %{WORD:action} %{DATA:state} %{DATA:protocol} translation from %{WORD:src_interface_name}:%{IP:src_ip}/%{DATA:src_port}(%{DATA:user}) to %{WORD:dst_interface_name}:%{IP:dst_ip}/%{DATA:dst_port} duration %{GREEDYDATA:duration}
+
+#ASA-6-305011  - TCP, UDP, or ICMP address translation slot was created
+ASA_6_305011 %{WORD:action} %{DATA:state} %{DATA:protocol} translation from %{DATA:src_interface_name}:%{IP:src_ip}/%{INT:src_port}(%{DATA:user}) to %{DATA:dst_interface_name}:%{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-6-607001 - The fixup sip command preallocated a SIP connection after inspecting a SIP message
+ASA_6_607001 Pre-allocate %{GREEDYDATA:protocol} secondary channel for %{DATA:src_interface}:%{IPORHOST:src_ip}(/%{INT:src_port})? to %{DATA:dst_interface}:%{IPORHOST:dst_ip}(/%{INT:dst_port})? from %{DATA:voip_message} message
+
+#ASA-5-106100 and ASA-2-106100 
+ASA_5_106100 access-list %{WORD:policy_id} %{CISCO_ASA_ACTION:action} %{WORD:protocol} %{DATA:src_interface}/%{IP:src_ip}\(%{INT:src_port}\)(\(%{DATA:src_user}\))? -> %{DATA:dst_interface}/%{IP:dst_ip}\(%{INT:dst_port}\)(\(%{DATA:dst_user}\))? hit-cnt %{INT:hit_count} %{CISCO_ASA_INTERVAL:interval} \[%{DATA:hashcode1}, %{DATA:hashcode2}\]
+
+#ASA-3-746016 - A DNS lookup has failed. Failure reasons include timeout, unresolvable, and nomemory.
+ASA_3_746016 %{DATA:event_raw}: %{DATA:protocol} lookup for %{DATA:url} %{DATA:result}, reason:%{GREEDYDATA:reason}
+
+#ASA-5-746015 - A fully qualified domain name lookup has succeeded.
+ASA_5_746015 %{DATA:event_raw}: %{GREEDYDATA:x2} %{DATA:FQDN} resolved %{IPORHOST:resolved_ip}
+
+#ASA-6-110002 - Failed to locate %{WORD} interface for protocol from src interface:src IP/src port todest IP/dest port
+ASA_6_110002 %{CISCO_ASA_REASON:reason} for %{WORD:protocol} from %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port} to %{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-6-602303 - A new SA was created.
+ASA_6_602303 %{WORD:protocol}: An %{CISCO_ASA_DIRECTION:direction} %{GREEDYDATA:tunnel_type} SA \(SPI= %{DATA:spi}\) between %{IP:src_ip} and %{IP:dst_ip} \(user= %{DATA:user}\) has been %{CISCO_ASA_ACTION:action}
+
+#ASA-6-602304 - An SA was deleted.
+ASA_6_602304 %{WORD:protocol}: An %{CISCO_ASA_DIRECTION:direction} %{GREEDYDATA:tunnel_type} SA \(SPI= %{DATA:spi}\) between %{IP:src_ip} and %{IP:dst_ip} \(user= %{DATA:user}\) has been %{CISCO_ASA_ACTION:action}
+
+#ASA-6-725001 - The SSL handshake has started with the remote device, which can be a client or server.
+ASA_6_725001 %{GREEDYDATA:event} with %{DATA:peer_type} %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port} for %{GREEDYDATA:session}
+
+#############1st##############
+
+#############2nd##############
+
+#ASA-5-713049  - An IPsec tunnel has been started.
+ASA_5_713049 Group = %{IP:ip}, IP = %{IP:ip}, Security negotiation complete for %{GREEDYDATA:tunnel_type} %{DATA:acts_as}, Inbound SPI = %{DATA:inbound_spi}, Outbound SPI = %{GREEDYDATA:outbound_spi}
+
+#ASA-6-725002 - The SSL handshake has completed successfully with the remote device
+#ASA-6-725006 - The SSL handshake with the remote device has failed.
+ASA_6_725002 %{GREEDYDATA:Event} %{DATA:peer_type} %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port}
+
+#ASA-6-725007 - The SSL session has terminated
+ASA_6_725007 %{GREEDYDATA:Event} %{DATA:peer_type} %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port}
+
+#ASA-5-713050 - Connection terminated for peer IP_address
+ASA_5_713050 Group = %{IP:src_ip}, IP = %{IP:src_ip}, %{GREEDYDATA:event} for peer %{IP:src_ip}.  Reason:%{GREEDYDATA:reason}  Remote Proxy %{IP:remote_proxy}, Local Proxy %{IP:local_proxy}
+
+#ASA-6-725003 - The remote device is trying to resume a previous SSL session
+ASA_6_725003 %{DATA:protocol} %{DATA:peer_type} %{DATA:src_interface}:%{IP:src_ip}/%{INT:src_port} %{GREEDYDATA:event}
+
+#ASA-6-302010 - A TCP connection has restarted
+ASA_6_302010 %{DATA:connections_in_use} in use, %{DATA:connections_most_use} most used
+
+#ASA-6-303002 - A client has uploaded or downloaded a file from the FTP server.
+ASA_6_303002 %{DATA:protocol} connection from %{DATA:src_interface}:%{IP:dst_ip}/%{DATA:dst_port} to %{DATA:dst_interface}:%{IP:src_ip}/%{DATA:src_port}, user %{USERNAME:user} %{DATA:action} file %{GREEDYDATA:file_name}
+
+#ASA-3-713061 -The ASA was not able to find security policy information for the private networks orhosts indicated in the message.
+ASA_3_713061 Group = %{IP:src_ip}, IP = %{IP:src_ip}, %{GREEDYDATA:event}: %{GREEDYDATA:reason} for remote proxy %{GREEDYDATA:remote_proxy} local proxy %{GREEDYDATA:local_proxy} on interface outside
+
+#ASA-6-106100 - The initial occurrence or the total number of occurrences during an interval are listed
+##Duplicate##ASA_6_106100 %{WORD:action} SecMPLS_access_in %{WORD:status} %{DATA:protocol} SecMPLS/%{IP:src_ip}%{DATA:Src_port} -> inside/%{IP:dst_ip}%{DATA:dst_port} hit-cnt %{INT:hit_count} first hit %{GREEDYDATA:first_hit}
+
+#ASA-5-713120 - IKE Phase 2 has completed successfully
+ASA_5_713120 Group = %{IP:ipadd}, IP = %{IP:ipadd}, %{GREEDYDATA:status} \(msgid=%{DATA:msg_id}\)
+
+#ASA-5-746014 - A fully qualified domain name has become obsolete
+ASA_5_746014 user-identity: ?%{GREEDYDATA:x1}?] %{GREEDYDATA:FQDN} address %{IPORHOST:address} %{WORD:Reason_for_failure}
+
+#ASA-4-106103 - A packet was denied by an access-list that was applied through a VPN filter
+ASA_4_106103 access-list %{DATA:acl_id} %{WORD:status} %{WORD:protocol} for user '<%{GREEDYDATA:user}>' outside/%{IP:outside_ip}\(%{DATA:outside_port}\) -> inside/%{IP:inside_ip}\(%{DATA:inside_port}\) hit-cnt %{INT:hit_count} %{GREEDYDATA:type_of_hit} \[%{GREEDYDATA:first_hit}\]
+
+#ASA-6-106102 - packet was either permitted or denied by an access-list that was applied through a VPN filter.
+ASA_6_106102 access-list %{DATA:acl_id} %{WORD:status} %{WORD:protocol} for user '<%{GREEDYDATA:user}>' %{DATA:src_interface}/%{IP:src_ip}\(%{DATA:src_port}\) -> %{DATA:dst_interface}/%{IP:dst_ip}\(%{DATA:dst_port}\) hit-cnt %{INT:hit_count} %{GREEDYDATA:type_of_hit} \[%{GREEDYDATA:first_hit}\]
+
+#ASA-5-713041 - The ASA is negotiating a tunnel as the initiator.
+ASA_5_713041 %{DATA} = %{IP:src_ip}, IKE Initiator: %{DATA:ike_initiator}, Intf %{DATA:src_interface}, IKE Peer %{IP:src_ip}  local Proxy Address %{IP:local_proxy}, remote Proxy Address %{IP:remote_proxy},  Crypto map \(%{DATA:crypto_map}\)
+
+#ASA-6-611101 - User authentication succeeded when accessing the ASA
+ASA_6_611101 %{GREEDYDATA:event}: ?(IP address: %{GREEDYDATA:src_ip},)? Uname: %{USER:user}
+
+#ASA-6-722023 - The SVC terminated either with or without compression
+ASA_6_722023 Group <%{DATA:group}> User <%{USER:user}> IP <%{IP:ip_add}> %{DATA:protocol} %{DATA:connection_type} connection %{WORD:status} %{GREEDYDATA:termination_type}
+
+#ASA-5-713257 - An ASA has acted as the responder in a LAN-to-LAN connection
+ASA_5_713257 Phase %{INT:phase_num} %{WORD:status}: %{GREEDYDATA:msg}:  Rcv'd: %{DATA:rcvd_initiator}  Cfg'd: %{GREEDYDATA:cfgd_initiator}
+
+#ASA-3-713902 - An error has occurred, which may be the result of a configuration error either on the headend or remote access client.
+ASA_3_713902 Group = %{IP:src_ip}, IP = %{IP:src_ip}, %{GREEDYDATA:event}
+
+############2nd##################
+############3rd##################
+
+#ASA-6-113008 The AAA transaction for a user associated with an IPsec or WebVPN connection was completed successfully.
+ASA_6_113008 %{DATA:ipsec_aaa_type} status %{WORD:status} : user = %{USER:user}
+
+#ASA-6-113012 - The user associated with a IPsec or WebVPN connection has been successfully authenticated to the local user database.
+ASA_6_113012 %{GREEDYDATA:ipsec_aaa_type} %{WORD:status} : %{WORD:database} database : user = %{USER:user}
+
+#ASA-5-611103 - The specified user logged out.
+##Dublicate### ASA_5_611103 %{GREEDYDATA:msg}: Uname: %{USER:user}
+
+#ASA-5-752016 - The indicated protocol (IKE version 1 or IKE version 2) successfully created an L2L tunnel.
+ASA_5_752016 %{DATA:protocol} was %{WORD:status} at %{GREEDYDATA:task}. Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq_num}.
+
+#ASA-4-113019 - An indication of when and why the longest idle user is disconnected.
+ASA_4_113019 Group = %{DATA:group}, Username = %{USERNAME:user}, IP = %{IP:ip_add}, Session %{WORD:session}. Session Type: %{DATA:session_type}, Duration: %{GREEDYDATA:duration}, Bytes xmt: %{INT:bytes_xmt}, Bytes rcv: %{INT:bytes_rcv}, Reason: %{GREEDYDATA:reason}
+
+#ASA-6-716002 - The WebVPN session has been terminated by a user request.
+ASA_6_716002 Group <%{DATA:group}> User <%{GREEDYDATA:user}> IP <%{IP:ip_add}> %{DATA:session_type} %{GREEDYDATA:event}: %{GREEDYDATA:reason}
+
+#ASA-5-752003 - An attempt is being made to initiate an IKEv2 tunnel that was based on the crypto map indicated.
+ASA_5_752003 %{GREEDYDATA:msg}. Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq_num}.
+
+#ASA-6-722023 - The SVC terminated either with or without compression 
+ASA_6_722023 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> %{WORD:protocol} %{WORD:connection} connection %{WORD:status} %{GREEDYDATA:reason}
+
+#ASA-5-722033 - The first SVC connection was established for the SVC session.
+ASA_5_722033 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> First %{WORD:protocol} %{WORD:connection} connection %{WORD:status} for SVC session.
+
+#ASA-6-722022 - The TCP or UDP connection was established with or without compression
+ASA_6_722022 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> %{WORD:protocol} %{WORD:connection} connection %{WORD:status} %{WORD:compression} compression
+
+#ASA-4-405001 - The ASA received an ARP packet, and the MAC address in the packet differs from theARP cache entry.
+ASA_4_405001 %{GREEDYDATA:msg} from %{IP:ip_add}/%{DATA:mac_add} on interface %{DATA:interface} with existing ARP entry %{IP:arp_ip}/%{GREEDYDATA:arp_mac_add}
+
+#ASA-6-113009 - The authentication or authorization of an IPsec or WebVPN connection has occurred
+ASA_6_113009 %{GREEDYDATA:msg} for user = %{USERNAME:user}
+
+#ASA-5-722032 - new SVC connection is replacing an existing one. You may be having troubleconnecting.
+ASA_5_722032 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> New %{WORD:protocol} %{WORD:connection} connection %{GREEDYDATA:msg}
+
+#ASA-5-722028 - An unused SVC connection was closed.
+###Duplicate### ASA_5_722028 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> Stale %{WORD:protocol} connection %{GREEDYDATA:status}
+
+#ASA-5-111008 - The user entered any command, with the exception of a show command.
+ASA_5_111008 User '%{USERNAME:user}' %{WORD:task} the %{DATA:command} command.
+
+#ASA-4-405003 - A client IP address in the network is the same as the ASA interface IP address.
+ASA_4_405003 %{GREEDYDATA:msg} between host %{IP:host} at %{DATA:host_mac_address} and interface %{DATA:interface}, %{GREEDYDATA:interface_mac_address}
+
+#ASA-4-722051
+ASA_4_722051 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> IPv4 Address <%{IPV4:ipv4}> IPv6 address <%{IPV6:ipv6}> %{GREEDYDATA:task}
+
+#ASA-6-605005 - user was authenticated successfully, and a management session started
+###Duplicate####ASA_6_605005 %{GREEDYDATA:msg} from %{IP:login_from_ip}/%{DATA:login_from_port} to Mgmt:%{IP:login_to_ip}/%{DATA:login_to_port} for user "%{USERNAME:user}"
+
+################3rd################
+
+################4th###############
+
+#ASA-5-502103 - The privilege level of a user changed.
+ASA_5_502103 %{GREEDYDATA:msg}: Uname: %{USERNAME:user} From: %{INT:old_priv_level} To: %{INT:new_priv_level}
+
+#ASA-6-315011 - An SSH session has ended.
+ASA_6_315011 %{WORD:protocol} session from %{IP:ip_add} on interface %{DATA:interface} for user "%{USERNAME:user}" %{WORD:status} normally
+
+#ASA-5-713076 - Rekeying durations are always set to the lower of the values proposed by IKE peers
+ASA_5_713076 Group = %{IP:ip_add}, IP = %{IP:ip_add}, %{GREEDYDATA:msg} rekeying duration from %{GREEDYDATA:duration}
+
+#ASA-4-722037
+###Duplicate## ASA_4_722037 Group <%{WORD:group}> User <%{USERNAME:user}> IP <%{IP:ip_add}> %{WORD:protocol} %{WORD:connection} connection: Transport closing.
+
+#ASA-4-752014 - The tunnel manager is falling back and attempting to initiate the tunnel using IKE version 1 after the tunnel failed
+ASA_4_752014 %{GREEDYDATA:msg}. Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq_num}.
+
+#ASA-4-733100 - The specified object in the message has exceeded the specified burst threshold rate or average threshold rate.
+ASA_4_733100 \[\s*%{DATA:drop_type}\s*\] drop %{DATA:drop_rate_id} exceeded. Current burst rate is %{INT:drop_rate_current_burst} per second, max configured rate is %{INT:drop_rate_max_burst}; Current average rate is %{INT:drop_rate_current_avg} per second, max configured rate is %{INT:drop_rate_max_avg}; Cumulative total count is %{INT:drop_total_count}
+
+#ASA-5-305013 - An attempt to connect to a mapped host using its actual address was rejected.
+ASA_5_305013 Asymmetric NAT rules matched for forward and reverse flows; Connection for %{WORD:protocol} src %{DATA:src_interface}:%{IPORHOST:src_ip}(/%{INT:src_port})? dst %{DATA:dst_interface}:%{IPORHOST:dst_ip}(/%{INT:dst_port})? %{CISCO_ASA_ACTION:action} due to NAT reverse path failure
+
+#ASA-4-313005 - No matching connection for ICMP error message:
+ASA_4_313005 %{GREEDYDATA:event}: %{WORD:err_protocol} src %{DATA:src_interface}:%{IPORHOST:src_ip}(\(%{DATA:src_user}\))? dst %{DATA:dst_interface}:%{IPORHOST:dst_ip}(\(%{DATA:dst_user}\))? \(type %{INT:err_icmp_type}, code %{INT:err_icmp_code}\) on %{DATA:src_interface} interface\.  Original IP payload: %{WORD:protocol} src %{IPORHOST:orig_src_ip} dst %{IPORHOST:orig_dst_ip} \(type %{INT:orig_icmp_type}, code %{INT:orig_icmp_code}\).
+
+#ASA-5-111010 - A user made a configuration change 
+ASA_5_111010 User '%{DATA:user}', running '%{GREEDYDATA:application_name}' from IP %{IPORHOST:src_ip}, executed '%{GREEDYDATA:command_executed}'
+
+#ASA-6-302013, ASA-6-302014, ASA-6-302015, ASA-6-302016 - A TCP/UDP connection slot between two hosts was created/deleted
+ASA_6_302013 %{CISCO_ASA_ACTION:action}(?: %{CISCO_ASA_DIRECTION:direction})? %{WORD:protocol} connection %{INT:connection_id} for %{DATA:src_interface}:%{IPORHOST:src_ip}/%{INT:src_port}( \(%{IPORHOST:src_mapped_ip}/%{INT:src_mapped_port}\))?(\(%{DATA:src_user}\))? to %{DATA:dst_interface}:%{IPORHOST:dst_ip}/%{INT:dst_port}( \(%{IPORHOST:dst_mapped_ip}/%{INT:dst_mapped_port}\))?(\(%{DATA:dst_user}\))?( duration %{TIME:duration} bytes %{INT:bytes})?(?: %{CISCO_ASA_REASON:reason})?( \(%{DATA:user}\))?
+
+#ASA-2-106017 - The ASA received a packet with the IP source address equal to the IP destination, and the destination port equal to the source port
+ASA_2_106017 Deny IP due to Land Attack from %{IP:src_ip} to %{IP:dst_ip}
+
+#ASA-2-106016 - A packet arrived at the ASA interface that has a destination IP address of 0.0.0.0 and a destination MAC address of the ASA interface.
+ASA_2_106016 Deny IP spoof from \(%{IP:src_ip}\) to %{IP:dst_ip} on interface %{GREEDYDATA:src_interface}
+
+#ASA-5-713130 - The device received a request for a valid transaction mode attribute (XAUTH or Mode Cfg) that is currently not supported
+ASA_5_713130 Group = %{NOTSPACE:group_id}(?:, Username = %{GREEDYDATA:user})?, IP = %{IP:peer_ip}, Received unsupported transaction mode attribute: %{GREEDYDATA:attribute}
+
+#ASA-6-713172 - NAT-Traversal auto-detected NAT
+ASA_6_713172 Group = %{GREEDYDATA:group}, IP = %{IP:src_ip}, Automatic NAT Detection Status:\s+Remote end\s*%{DATA:is_remote_natted}\s*behind a NAT device\s+This\s+end\s*%{DATA:is_local_natted}\s*behind a NAT device
+
+#ASA-6-737006 - The local pool request has succeeded.
+ASA_6_737006 IPAA: Local pool request succeeded for tunnel-group '%{GREEDYDATA:tunnel_group}'
+
+#ASA-6-737026 - The client has assigned the given address from a local pool.
+ASA_6_737026 IPAA: Client assigned %{IP:ip} from local pool
+
+#############4th###############
+
+#############5th###############
+
+#ASA-6-734001 -The DAP records that were selected for the connection are listed.
+ASA_6_734001 DAP: User %{DATA:user}, Addr %{IP:peer_ip}, Connection %{GREEDYDATA:connection_type}: The following DAP records were selected for this connection: %{GREEDYDATA:dap_records}
+
+#ASA-5-713228 - IKE obtained a private IP address for the client from DHCP or from the address pool
+ASA_5_713228 Group = %{NOTSPACE:group_id}(?:, Username = %{GREEDYDATA:user})?, IP = %{IP:peer_ip}, Assigned private IP address %{IP:private_ip} to remote user
+
+#ASA-6-113004 - The AAA operation on an IPsec or WebVPN connection has been completed successfully.
+ASA_6_113004 AAA user %{WORD:aaa_type} Successful : server =  %{IP:aaa_server_ip} : user = %{GREEDYDATA:user}
+
+#ASA-5-713119 - IKE Phase 1 has completed successfully
+ASA_5_713119 Group = %{NOTSPACE:group_id}(?:, Username = %{GREEDYDATA:user})?, IP = %{IP:peer_ip}, PHASE 1 COMPLETED
+
+#ASA-6-737016  - The ASA successfully released the IP address assigned through local pool
+ASA_6_737016 IPAA: Freeing local pool address %{IP:ip}
+
+#ASA-4-750003 - The negotiation of an SA was aborted 
+ASA_4_750003 Local:%{IPORHOST:src_ip}:%{INT:src_port} Remote:%{IPORHOST:dst_ip}:%{INT:dst_port} Username:%{DATA:username} %{DATA:method} Negotiation aborted due to ERROR: %{GREEDYDATA:abortion_reason}
+
+#ASA-6-713905 - Descriptive_event_string.
+ASA_6_713905 Group = %{NOTSPACE:group_id}(?:, Username = %{GREEDYDATA:user})?, IP = %{IP:peer_ip}, Floating NAT-T from %{IP:peer_original_ip} port %{INT:peer_original_port} to %{IP:peer_new_ip} port %{INT:peer_new_port}
+
+#ASA-4-410001 - The domain-name length exceeds 255 bytes in a UDP DNS packet.
+ASA_4_410001 Dropped UDP DNS %{DATA:state} from %{GREEDYDATA:src_interface}:%{IP:src_ip}/%{INT:src_port} to %{GREEDYDATA:dst_interface}:%{IP:dst_ip}/%{INT:dst_port}; %{GREEDYDATA:field_type} %{INT:field_length} bytes exceeds %{GREEDYDATA:limit_type} of %{INT:packet_length} bytes
+
+#ASA-6-713172 - NAT-Traversal auto-detected NAT.
+ASA_6_713172 Group = %{GREEDYDATA:group}, IP = %{IP:src_ip}, Automatic NAT Detection Status:\s+Remote end\s*%{DATA:is_remote_natted}\s*behind a NAT device\s+This\s+end\s*%{DATA:is_local_natted}\s*behind a NAT device
+
+#ASA-6-713184 - The client operating system and application version
+ASA_6_713184 Group = %{DATA:group}, Username = %{DATA:user}, IP = %{IP:src_ip}, Client Type: %{DATA:client_type} Client Application Version: %{GREEDYDATA:app_version}
+
+#ASA-4-402119 - An IPsec packet was received with an invalid sequence number.
+ASA_4_402119%{WORD:protocol}: Received an %{WORD:orig_protocol} packet \(SPI= %{DATA:spi}, sequence number= %{DATA:seq_num}\) from %{IP:src_ip} \(user= %{DATA:user}\) to %{IP:dst_ip} that failed anti-replay checking
+
+#ASA-5-713904 - Notification status information
+ASA_5_713904 IP = %{IPORHOST:src_ip}, Received encrypted packet with no matching SA, %{CISCO_ASA_ACTION:action}
+
+#ASA-4-500004 - An invalid transport number was used, in which the source or destination port number for a protocol is zero
+ASA_4_500004 %{CISCO_REASON:reason} for protocol=%{WORD:protocol}, from %{IP:src_ip}/%{INT:src_port} to %{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-4-402119 - An IPsec packet was received with an invalid sequence number.
+ASA_4_402119 %{WORD:protocol}: Received an %{WORD:orig_protocol} packet \(SPI= %{DATA:spi}, sequence number= %{DATA:seq_num}\) from %{IP:src_ip} \(user= %{DATA:user}\) to %{IP:dst_ip} that failed anti-replay checking
+
+#ASA-4-752012 - The indicated protocol failed to initiate a tunnel using the configured crypto map.
+ASA_4_752012 %{DATA:protocol} was %{WORD:status} at %{GREEDYDATA:task} Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq_num}.
+
+#ASA-5-713259 - The termination reason for the ISAKMP session appears, which occurs when the session is torn down through session management.
+ASA_5_713259 Group = %{IP:src_ip}, ?(Usernamename = %{DATA:user},)? IP = %{IP:src_ip}, %{GREEDYDATA:event}. Reason: %{GREEDYDATA:reason}
+
+#ASA-5-713201 - The ASA has received a duplicate of a previous Phase 1 or Phase 2 packet, and will transmit the last message
+ASA_5_713201 Group = %{GREEDYDATA:src_ip}, IP = %{IP:src_ip}, Duplicate Phase %{INT:phase_num} packet detected.  %{GREEDYDATA:action} 
+
+#############5th################
+
+#############6th################
+
+#ASA-6-722036
+ASA_6_722036 Group <%{WORD:group}> User <%{USERNAME:user}> IP <%{IP:ipadd}> Transmitting large packet %{INT:packet_size} \(threshold %{INT:threshold}\).
+
+#ASA-6-737031 - The standby ASA cleared the IP address assignment
+ASA_6_737031 IPAA: Removed %{IP:ipadd} from standby
+
+#ASA-6-721018 - When a WebVPN user logs out on the active unit, a logout message is sent to the standby unit to remove the user session from the standby unit
+ASA_6_721018 (%{DATA:device}) WebVPN session for client user %{USERNAME:user}, IP %{IP:ipadd} has been deleted.
+
+#ASA-5-713075 - Rekeying durations are always set to the lower of the values proposed by IKE peers
+ASA_5_713075 Group = %{IP:ipadd}, IP = %{IP:ipadd}, Overriding Initiator's IPSec rekeying duration from %{INT:larger_value} to %{INT:smaller_value}
+
+#ASA-5-713073 - Rekeying durations are always set to the lower of the values proposed by IKE peers
+ASA_5_713073 Group = %{IP:ipadd}, IP = %{IP:ipadd}, Responder forcing change of %{WORD:protocol} rekeying duration from %{INT:larger_value} to %{INT:smaller_value} seconds
+
+#ASA-6-725005 - The server has requested the certificate of the ASA for authentication
+ASA_6_725005 SSL %{WORD:peer_type} %{WORD:interface}:%{IP:src_ip}/%{INT:src_port} requesting our device certificate for authentication.
+
+#ASA-6-721016 - A remote WebVPN user has logged in successfully and the login information has been installed on the standby unit
+ASA_6_721016 (%{DATA:device}) WebVPN session for client user %{USERNAME:user}, IP %{IP:ipadd} has been created.
+
+#ASA-6-737029 - The standby ASA accepted the IP address assignment.
+ASA_6_737029 IPAA: Added %{IP:ip_address} to standby
+
+#ASA-5-737003 The DHCP server configuration for the given tunnel group is not valid.
+ASA_5_737003 IPAA: DHCP configured, no viable servers found for tunnel-group '%{DATA:tunnel_group}'
+
+#ASA-6-737026 - The client has assigned the given address from a local pool.
+ASA_6_737026 IPAA: Client assigned %{IP:ipadd} from local pool
+
+#ASA-4-722041 - An IPv6 address was not available for assignment to the remote SVC client
+ASA_4_722041 TunnelGroup <%{DATA:tunnel_group}> GroupPolicy <%{WORD:group_policy}> User <%{USERNAME:user}> IP <%{IP:ipadd}> No IPv6 address available for SVC connection
+
+#ASA-6-722055 - The indicated user is attempting to connect with the given user-agent
+ASA_6_722055 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:public_ip}> Client Type: %{WORD:client} %{GREEDYDATA:user_agent}
+
+#ASA-4-419002 - A duplicate TCP SYN was received during the three-way-handshake that has a different initial sequence number from the SYN that opened the embryonic connection
+ASA_4_419002 Duplicate TCP SYN from %{WORD:interface}:%{IP:src_ip}/%{DATA:src_port} to %{WORD:out_interface}:%{IP:dst_ip}/%{INT:dst_port} with different initial sequence number
+
+#ASA-6-716058 - The SSL tunnel was dropped and the AnyConnect session enters the inactive state, which can be caused by a hibernating host, a standby host, or a loss of network connectivity
+ASA_6_716058 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ipadd}> AnyConnect session lost connection. Waiting to resume.
+
+#ASA-5-750002 - An incoming tunnel or SA initiation request (IKE_INIT_SA request) has been received
+ASA_5_750002 Local:%{IP:src_ip}:%{INT:src_port} Remote:%{IP:dst_ip}:%{INT:dst_port} Username:%{USERNAME:user} IKEv2 Received a IKE_INIT_SA request
+
+#ASA-4-711004 - process used the CPU for more than 100 milliseconds
+ASA_4_711004 %{DATA:task} ran for %{INT:msec} msec, Process = %{GREEDYDATA:process_name}, PC = %{DATA:pc}, Call stack = %{GREEDYDATA:call_stack}
+
+#ASA-5-713074 - Rekeying durations are always set to the lower of the values proposed by IKE peers
+ASA_5_713074 Group = %{IP:ipadd}, IP = %{IP:ipadd}, Responder forcing change of IPSec rekeying duration from %{INT:larger_value} to %{INT:smaller_value} Kbs
+
+#ASA-5-752004 - An attempt is being made to initiate an IKEv1 tunnel that was based on the crypto map indicated.
+ASA_5_752004 Tunnel Manager dispatching a KEY_ACQUIRE message to IKEv1.  Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq}.
+
+#ASA-4-752010 - No IPsec proposal was found to be able to initiate an IKE version 2 tunnel
+ASA_4_752010 %{DATA:protocol} Doesn't have a proposal specified
+
+#ASA-5-722034 - A reconnection attempt has occurred.
+ASA_5_722034 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ipadd}> New TCP SVC connection, no existing connection.
+
+#ASA-6-716059 - An AnyConnect session resumed from the inactive state.
+ASA_6_716059 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:ipadd}> AnyConnect session resumed connection from IP <%{IP:resumed_ip}>.
+
+#ASA-3-752015 - An attempt to bring up an L2L tunnel to a peer failed after trying with all configured protocols.
+ASA_3_752015 Tunnel Manager has failed to establish an L2L SA. All configured IKE versions failed to establish the tunnel. Map Tag= %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq}.
+
+
+#################6th##################
+#ASA-6-716038 WEB VPN User Logon
+ASA_6_716038 Group <%{DATA:group}> User <%{DATA:user}> IP <%{IP:src_ip}> Authentication: %{DATA:status}, Session Type: %{GREEDYDATA:session_type}
+
+####Extra patterns  - 18/01/2017
+#ASA-2-106100 =
+###Triplicate#####ASA_2_106100 access-list %{DATA:policy_id} %{CISCO_ACTION:action} %{DATA:protocol} for user '%{DATA:src_fwuser}' %{DATA:src_interface}/%{IP:src_ip}\(%{INT:src_port}\) -> %{DATA:dst_interface}/%{IP:dst_ip}\(%{INT:dst_port}\) hit-cnt %{INT:hit_count} %{CISCO_INTERVAL:interval} \[%{DATA:hashcode1}, %{DATA:hashcode2}\]
+
+#ASA-6-106012 - An IP packet was seen with IP options.
+ASA_6_106012 Deny IP from %{IP:src_ip} to %{IP:dst_ip}, IP options: %{GREEDYDATA:reason_denied}
+
+#ASA-4-418001 - A packet from the specified source to the destination
+ASA_4_418001 Through-the-device packet to/from management-only network is denied: %{WORD:protocol} src %{DATA:src_interface}:%{IP:src_ip}/%{INT:src_port} dst %{DATA:dst_interface}:%{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-6-108007 - The ESMTP inspection engine no longer inspects the traffic on this connection
+ASA_6_108007 TLS started on ESMTP session between client %{DATA:src_interface}:%{IP:src_ip}/%{INT:src_port} and server %{DATA:dst_interface}:%{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-6-110003 An error occurred when the ASA tried to find the next hop on an interface routing table.
+ASA_6_110003 %{GREEDYDATA:event} for %{DATA:protocol} from %{DATA:src_interface}:%{IP:src_ip}/%{INT:src_port} to %{DATA:dst_interface}:%{IP:dst_ip}/%{INT:dst_port}
+
+#ASA-5-752004 - An attempt is being made to initiate an IKEv1 tunnel that was based on the crypto map indicated.
+###Duplicate#ASA_5_752004 Tunnel Manager dispatching a KEY_ACQUIRE message to IKEv1. Map Tag = %{DATA:map_tag}. Map Sequence Number = %{INT:map_seq}
+
+#ASA-2-106001 An attempt was made to connect to an inside address is denied by the security policy that is defined for the specified traffic type
+ASA_2_106001 %{GREEDYDATA:event} from %{IP:src_ip}/%{INT:src_port} to %{IP:dst_ip}/%{INT:dst_port} flags %{DATA:tcp_flag} on interface %{GREEDYDATA:dst_interface}
+
+#ASA-4-737032 The standby ASA did not have an IP address in use when the active ASA attempted to release it. The failover pair may be out-of-sync
+ASA_4_737032 %{GREEDYDATA:event} %{IP:src_ip} from standby: %{GREEDYDATA:reason}
+
+#ASA-2-106007 A UDP packet containing a DNS query or response was denied.
+ASA_2_106007 %{GREEDYDATA:event} from %{IP:src_ip}/%{INT:src_port} to %{IP:dst_ip}/%{INT:dst_port} %{GREEDYDATA:reason}
+
+#ASA-2-106006 An inbound UDP packet was denied by the security policy that is defined for the specified traffic type.
+ASA_2_106006 %{GREEDYDATA:event} from %{IP:src_ip}/%{INT:src_port} to %{IP:dst_ip}/%{INT:dst_port} on interface %{GREEDYDATA:src_interface}
+
+#ASA-5-111007 You have entered the reload or configure command to read in a configuration
+ASA_5_111007 %{GREEDYDATA:event}: %{DATA:source} reading from %{GREEDYDATA:reading_from}
+
+#ASA-4-313004 ICMP packets were dropped
+ASA_4_313004 %{GREEDYDATA:event} type=%{INT:icmp_type}, from laddr %{IP:src_ip} on %{DATA:src_interface} to %{IP:dst_interface}: %{GREEDYDATA:reason}
+
+#ASA-6-602101 The ASA sent an ICMP destination unreachable message and fragmentation is needed.
+ASA_6_602101 %{GREEDYDATA:event}, dest_addr=%{IP:dst_ip}, src_addr=%{IP:src_ip}, prot=%{WORD:protocol}
+
+#ASA-3-305006 A protocol (UDP, TCP, or ICMP) failed to create a translation through the ASA.
+ASA_3_305006 %{GREEDYDATA:event} for %{WORD:protocol} src %{DATA:src_interface}:%{IP:src_ip}(%{DATA:user})? dst %{DATA:dst_interface}:%{IP:dst_ip} \(type %{INT:icmp_type}, code %{INT:icmp_code}\)
+
+#ASA-6-716003 The WebVPN user in this group at the specified IP address has been granted access to this URL
+ASA_6_716003 Group <%{DATA:group}> User <%{GREEDYDATA:user}> IP <%{IP:ip_add}> %{DATA:session_type} %{GREEDYDATA:event}: %{GREEDYDATA:url}
+
+#ASA-6-716001 The WebVPN session has started for the user in this group at the specified IP address.
+ASA_6_716001 Group <%{DATA:group}> User <%{GREEDYDATA:user}> IP <%{IP:src_ip}> %{GREEDYDATA:event}.
+
+#ASA-4-768001 A system resource allocation level has reached its warning threshold
+ASA_4_768001 QUOTA: %{GREEDYDATA:event}: requested %{INT:number_requested}, current %{INT:number_assigned}, warning level %{INT:warning_level}
+
+#ASA-3-106014 The ASA denied any inbound ICMP packet access.
+ASA_3_106014 %{GREEDYDATA:event} src %{GREEDYDATA:src_interface}:%{IP:src_ip} dst %{GREEDYDATA:dst_interface}:%{IP:dst_ip} \(type %{INT:icmp_type}, code %{INT:icmp_code}\)
+
+#ASA-6-606001 An administrator has been authenticated successfully, and an ASDM session started.
+#ASA-6-606001 An ASDM session ended.
+#ASA-6-606003 An ASDM logging connection was started by a remote management client.
+#ASA-6-606004 An ASDM logging connection was terminated.
+ASA_6_606003 %{GREEDYDATA:event} number %{INT:number} from %{IP:src_ip} %{GREEDYDATA:action}
+
+#ASA-3-722035 large packet was sent to the client.
+ASA_3_722035 Group <%{DATA:group}> User <%{USERNAME:user}> IP <%{IP:src_ip}> %{GREEDYDATA:event} %{INT:packet_size} \(threshold %{INT:threshold}\).
+
+#ASA-5-502112 A group policy has been removed using the group-policy CLI command.
+ASA_5_502112 %{GREEDYDATA:event} name: %{GREEDYDATA:policy_name} Type: %{GREEDYDATA:policy_type}
+
+#ASA-3-734004 A DAP processing error occurred.
+ASA_3_734004 %{GREEDYDATA:event}: %{GREEDYDATA:error}
+#ASA-6-716039 Before a WebVPN session starts, the user must be authenticated successfully.Authentication: rejected
+ASA_6_716039 Group <%{DATA:group}> User <%{DATA:user}> IP <%{IP:src_ip}> Authentication: %{DATA:status}, Session Type: %{GREEDYDATA:session_type}
+
+#ASA-5-111001 You have entered the write command to store your configuration on a device (either floppy, flash memory, TFTP, the failover standby unit, or the console terminal).
+ASA_5_111001 %{GREEDYDATA:event}: %{GREEDYDATA:source} writing to %{GREEDYDATA:writing_to}
+
+#ASA-5-111004 You have entered the config floppy/memory/ network command or the write floppy/memory/network/standby command.
+ASA_5_111004 %{GREEDYDATA:writing_on_device} end configuration: %{GREEDYDATA:end_configuration}
+
+#ASA-6-713235 Normally, IKE packets should never be sent from the standby unit to the remote peer. If such an attempt is made, an internal logic error may have occurred.
+ASA_6_713235 Group = %{GREEDYDATA:src_ip}, IP = %{IP:src_ip}, %{GREEDYDATA:event}\. %{GREEDYDATA:action}
+
+#ASA-4-713903 An error occurred for an IPsec/IKEv1 VPN connection when a redirect URL was installed, and the ACL was received from the ISE, but the redirect ACL does not exist on the ASA.
+ASA_4_713903 %{GREEDYDATA}: %{GREEDYDATA:event} %{NOTSPACE} %{NOTSPACE} %{INT:dst_port} from %{IP:src_ip}:%{INT:src_port}
+
+#ASA-6-113015 The AAA authentication on a connection has failed. The username is hidden when invalid or unknown, but appears when valid or the no logging hide username command has been configured
+ASA_6_113015 AAA user authentication %{CISCO_ASA_ACTION:action} : reason = %{GREEDYDATA:reason} : %{GREEDYDATA:server} : user = %{GREEDYDATA:user}

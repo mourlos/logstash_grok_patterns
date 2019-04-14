@@ -1,0 +1,18 @@
+#New PAM session created
+PAMMESSAGE %{SSHSESSION}|%{SSHKEYAUTH}|%{PAMDISCONNECT}|%{SSHDAUTH}|%{INVALIDUSER1}|%{INVALIDUSER2}|%{INVALIDUSER3}
+
+# SSH Sessions open / closes 
+SSHSESSION %{GREEDYDATA}: session %{PAMSESSIONSTATE:pam_state} for user %{WORD:pam_user} ?(%{GREEDYDATA})
+PAMSESSIONSTATE opened|closed?|invalid user|illegal user|
+
+# Key based auth
+SSHKEYAUTH Accepted publickey for %{WORD:pam_user} from %{IP:ssh_remote_host} port %{INT} ssh2: %{GREEDYDATA:ssh_key_fingerprint}
+
+# Disconnect PAM user
+PAMDISCONNECT Received disconnect from %{IP:ssh_remote_host}: %{GREEDYDATA}
+
+# Patterns for failed attempts
+SSHDAUTH %{GREEDYDATA}\(%{DATA:sshd_action}\): %{GREEDYDATA:action}; ?(user %{WORD:pam_user})? ?(logname=%{DATA:logname} uid=%{INT:uid} euid=%{INT:euid} tty=%{DATA:tty} ruser=%{DATA:ssh_remote_user} rhost=%{IPORHOST:ssh_remote_host})?
+INVALIDUSER1 %{GREEDYDATA}: %{PAMSESSIONSTATE:ssh_action} %{DATA:user} \[%{DATA:ssh_state}\]
+INVALIDUSER2 %{GREEDYDATA:reason} %{PAMSESSIONSTATE:ssh_action} %{WORD:pam_user} from %{IP:ssh_remote_host} port %{INT:ssh_remoete_port} %{DATA:type} \[%{DATA:ssh_state}\]
+INVALIDUSER3 %{GREEDYDATA:reason} for %{PAMSESSIONSTATE:ssh_action} %{WORD:pam_user} from %{IP:ssh_remote_host} ?(port %{INT:ssh_remoete_port} %{DATA:type})?

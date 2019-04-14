@@ -1,0 +1,4 @@
+###This files contains the patterns needed for IPS related events
+
+IPS_EVENT \[%{DATA}\] "%{DATA:event}" \[Impact: %{DATA:impact}\] From "%{IP:detection_ip}" at ?%{IPS_DATE:event_time} \[Classification: %{DATA:classification}\] \[Priority: %{INT:priority}\] \{%{WORD:protocol}\} %{IP:src_ip}:%{INT:src_port} \(%{WORD:src_protocol}\)->%{IP:dst_ip}:%{INT:dst_port} \(%{WORD:dst_protocol}\)
+

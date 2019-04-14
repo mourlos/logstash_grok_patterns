@@ -1,0 +1,11 @@
+###These patterns apply the message field on logs that are coming from cisco switches
+CISCOSW <%{INT}>%{INT}: %{SYSLOGHOST}: %{INT}: %{GREEDYDATA:timestamp_CreationTime}: %%{DATA:UniqueIdentifier}: Host %{GREEDYDATA:everything_else}
+
+##This paatern is not currently been used
+##SWLOG %{SW_1}|%{SW_2}|%{SW_3}|%{SW_4}
+
+##The patterns will matches the messages on the switch_log field
+SW_1 (%{INT}:)? %{SYSLOGTIMESTAMP:received_at} GMT: %%{DATA:event_info}: %{DATA:extra_info} Interface %{GREEDYDATA:interface}: %{GREEDYDATA:reason}
+SW_2 (%{INT}: )?%{SYSLOGTIMESTAMP:received_at} GMT: %%{DATA:event_info}: Interface %{GREEDYDATA:interface}: %{GREEDYDATA:reason}
+SW_3 (\*)?%{GREEDYDATA:received_at} GMT: %%{DATA:event_info}: User:%{DATA:user} %{DATA:action}: %{GREEDYDATA:command}
+SW_4 \*%{GREEDYDATA:received_at} GMT: \*%%{DATA:event_info}: %{DATA:extra_info} %{GREEDYDATA:reason_1}. %{GREEDYDATA:hostname}

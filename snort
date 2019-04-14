@@ -1,0 +1,8 @@
+####This file contain patterns for the snort logs that are coming as syslog######
+BASIC \[%{DATA:useless}\] %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\] \{%{DATA:protocol}\} %{IP:src_ip}:%{INT:src_port} -> %{IP:dst_ip}:%{INT:dst_port}
+ACTION \[%{DATA:useless}\] (%{DATA:action}) %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\] \{%{DATA:protocol}\} %{IP:src_ip}:%{INT:src_port} -> %{IP:dst_ip}:%{INT:dst_port}
+ACTION2 \[%{DATA:useless}\] (%{DATA:action}) %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\] \{%{DATA:protocol}\} %{IP:src_ip} -> %{IP:dst_ip}
+BASIC2 \[%{DATA:useless}\] %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\]: \{%{DATA:protocol}\} %{IP:src_ip}:%{INT:src_port} -> %{IP:dst_ip}:%{INT:dst_port}
+ACTION3 \[%{DATA:useless}\] (%{DATA:action}) %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\]: \{%{DATA:protocol}\} %{IP:src_ip}:%{INT:src_port} -> %{IP:dst_ip}:%{INT:dst_port}
+ACTION4 \[%{DATA:useless}\] (%{DATA:action}) %{DATA:snort_mesage} \[%{DATA:classification}\] \[Priority: ?%{INT:priority}\]: \{%{DATA:protocol}\} %{IP:src_ip} -> %{IP:dst_ip}
+

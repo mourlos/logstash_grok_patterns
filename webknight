@@ -1,0 +1,27 @@
+##These patterns are being used for parsing logs coming from the webknight WAF
+
+
+WEBKNIGHT_1 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ;  ;  ; %{DATA:request_method} ; %{DATA:url} ; %{DATA:url2} ;  ; %{GREEDYDATA:state}
+
+WEBKNIGHT_2 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ;  ;  ; %{DATA:request_method} ; %{DATA:url} ; %{DATA:url2} ;  ; %{DATA:reason} ; %{DATA:error_code} ; Referer: %{DATA:referer} ; User-Agent: %{DATA:user-agent} ; From: %{DATA:from} ; Accept-Language: %{DATA:langauge} ; Accept: %{DATA:accept} ; %{DATA:state2}  Content-Length: %{DATA:content-length}  X-UA-Compatible: %{DATA:browser}  X-Frame-Options: %{DATA:x-frames-options}  X-Content-Type-Options: %{DATA:x-content-type-option}  Server: %{DATA:server}; mode=%{DATA:mode}     ; %{GREEDYDATA:state}
+
+WEBKNIGHT_3 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ; %{DATA:url} ; %{DATA:user-agent} ; %{DATA:request_method} ; %{DATA:file} ; %{DATA:file2} ; transport=%{DATA:transport}&clientProtocol=%{DATA:client_protocol}&pageid=%{DATA:page_id}&connectionToken=%{DATA:connection_token}&connectionData=%{DATA:connection_data}&tid=%{DATA:tid} ; %{GREEDYDATA:state}
+
+WEBKNIGHT_4 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ;  ;  ; %{DATA:url} ; %{DATA:url2} ; %{GREEDYDATA:state}
+
+WEBKNIGHT_5 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ; %{DATA:url} ; %{GREEDYDATA:user-agent} ; %{DATA:url2} ; %{DATA:url3} ; %{GREEDYDATA:state}
+
+WEBKNIGHT_6 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ; %{DATA:url} ; %{GREEDYDATA:user-agent} ; %{GREEDYDATA:state}
+
+WEBKNIGHT_7 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ; %{DATA:url} ; %{DATA:user-agent} ; %{DATA:request_method} ; %{DATA:file} ; ALERT: %{DATA:alert} ; %{DATA:protocol} ; %{DATA:chache_key} ; %{DATA:full_url} ; %{DATA:user_agent} ; ALERT: %{DATA:alert} ; MONITORED: %{DATA:monitored} ; Referer: %{DATA:referer} ; User-Agent: %{DATA:user_agent} ; From: %{DATA:from} ; Accept-Language: %{DATA:accept_language} ; Accept: %{DATA:accept}
+
+WEBKNIGHT_8 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ; %{DATA:username} ;  ;  ; %{DATA:url} ; %{DATA:user-agent} ; %{DATA:request_method} ; %{DATA:file} ; %{DATA:file2} ; transport=%{DATA:transport}&clientProtocol=%{DATA:client_protocol}&pageid=%{DATA:page_id}&connectionToken=%{DATA:connection_token}&connectionData=%{DATA:connection_data}&tid=%{DATA:tid} ; %{GREEDYDATA:state}
+
+WEBKNIGHT_9 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ;  ;  ; %{DATA:request_method} ; %{DATA:url} ; %{DATA:protocol} ;  ;  ; ALERT: %{DATA:alert1} ; %{DATA:alert2} ; MONITORED: %{DATA:monitored} ; Referer: %{DATA:referer} ; User-Agent: %{DATA:user-agent} ; From: %{DATA:from} ; Accept-Language: %{DATA:language} ; Accept: %{DATA:accept}
+
+WEBKNIGHT_10 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ; %{DATA:username} ;  ;  ; %{DATA:url} ; %{DATA:user-agent} ; %{DATA:request_method} ; %{DATA:file} ; %{DATA:file2} ;  ; %{GREEDYDATA:state}
+
+WEBKNIGHT_11 %{DATA:Date} ; %{DATA:Time} ; %{DATA:log_format} ; %{DATA:onPreprocHeaders} ; %{IP:src_ip} ;  ;  ;  ; %{DATA:url} ; %{DATA:user-agent} ; %{DATA:request_method} ; %{DATA:file} ; %{DATA:x1} ; %{DATA:http_method} ; ALERT: %{DATA:alert} ; %{GREEDYDATA:header_info} Host: %{DATA:hostname} Referer: %{DATA:referer} User-Agent: %{GREEDYDATA:user_agent} ; ALERT: %{DATA:alert_1} ; MONITORED: %{DATA:monitored} ; Referer: %{GREEDYDATA:referer_1}
+
+###This is how the paterns will be called
+#%{WEBNIGHT_9}|%{WEBKNIGHT_2}|%{WEBKNIGHT_1}|%{WEBKNIGHT_3}|%{WEBKNIGHT_4}|%{WEBKNIGHT_5}|%{WEBKNIGHT_6}|%{WEBKNIGHT_7}|%{WEBKNIGHT_8}|%{WEBKNIGHT_10}

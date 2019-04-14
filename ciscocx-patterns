@@ -1,0 +1,11 @@
+##The following patterns will be used for parsing the logs
+##coming from a cisco cx device
+
+##This patterns checks on all patterns bellow
+CX %{CX_1}|%{CX_2}
+
+##Matches spcific tyoe of mesasge
+CX_1 %{SYSLOG5424PRI}%{INT:logtype} %{TIMESTAMP_ISO8601:time_received} %{HOSTNAME:hostname} CiscoNGFW %{INT:lognumber} %{INT:x1} \[%{DATA:x2}@%{INT:x3} Ev_Id="%{DATA:event_id}" Syslog_Server_Drop_Count="%{INT:server_drop__count}" Count="%{INT:count}" Event_Type="%{INT:event_typ_2}" Event_Type_Action="%{DATA:event_type_action}" Ev_SrcLabel="%{DATA:event_src_label}" Ev_SrcId="%{DATA:Ev_SrcId}" Ev_SrcHwType="%{DATA:Ev_SrcHwType}" Event_Type_Name="%{DATA:Event_Type_Name}" Syslog_Server_Statistics_LastLoggedTime="%{GREEDYDATA:Syslog_Server_Statistics_LastLoggedTime}" Server_Hostname="%{HOSTNAME:Server_Hostname}" Syslog_Server_Export_Count="%{INT:Syslog_Server_Export_Count}" Ev_Producer_Name="%{DATA:Ev_Producer_Name}"\]
+
+##Matches spcific tyoe of mesasge
+CX_2 %{SYSLOG5424PRI}%{INT:logtype} %{TIMESTAMP_ISO8601:time_received} %{HOSTNAME:hostname} CiscoNGFW %{INT:lognumber} %{INT:x1} \[%{DATA:x2}@%{INT:x3} Ev_Id="%{DATA:event_id}" Component_Name="%{DATA:Component_Name}" Application_Name="%{DATA:Application_Name}" Event_Type="%{INT:Event_Type}" Count="%{INT:Count}" Component_Version="%{INT:Component_Version}" Event_Type_Action="%{DATA:Event_Type_Action}" Ev_SrcLabel="%{DATA:Ev_SrcLabel}" Ev_SrcId="%{INT:Ev_SrcId}" Ev_SrcHwType="%{DATA:Ev_SrcHwType}" Event_Type_Name="%{DATA:Event_Type_Name}" App_Version="%{DATA:App_Version}" Component_Display_Name="%{GREEDYDATA:Component_Display_Name}" Ev_Producer_Name="%{DATA:Ev_Producer_Name}"\]

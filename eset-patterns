@@ -1,0 +1,2 @@
+#New ESET error/warning pattern
+ESETMESSAGE %{WORD:level}\[%{WORD}\]: %{GREEDYDATA:cause}: %{GREEDYDATA:issue}

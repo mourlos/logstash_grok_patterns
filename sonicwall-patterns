@@ -1,0 +1,14 @@
+###These patterns can be used to parse logs coming from SonicWall Firewalls.
+##Pattern to call all of the rest
+SONICWALL %{SONIC_1}|%{SONIC_2}|%{SONIC_3}|%{SONIC_4}
+##Logs that contain the icmp code
+SONIC_1 <%{INT}>id=%{DATA:id} sn=%{DATA:fw_serial_number} time="%{GREEDYDATA}" fw=%{IPORHOST:fw_wan_ip} pri=%{INT:msg_priorityi} c=%{INT:msg_category} m=%{INT:msg_id} msg="%{DATA:event}" n=%{INT:msg_count} src=%{IPORHOST:src_ip}:%{INT:src_port}:%{DATA:from_iface} dst=%{IPORHOST:dst_ip}:%{INT:dst_port}:%{DATA:to_iface} type=%{INT:cimp_type} code=%{INT:icmp_code}
+
+##Logs that contain the protocol, service and the rule ID of the destination
+SONIC_3 <%{INT}>id=%{DATA:id} sn=%{DATA:fw_serial_number} time="%{GREEDYDATA}" fw=%{IPORHOST:fw_wan_ip} pri=%{INT:msg_priorityi} c=%{INT:msg_category} m=%{INT:msg_id} msg="%{DATA:event}" n=%{INT:msg_count} src=%{IPORHOST:src_ip}:%{INT:src_port}:%{DATA:from_iface} dst=%{IPORHOST:dst_ip}:%{INT:dst_port}:%{DATA:to_iface} proto=%{DATA:protocol}/%{DATA:service} rule="%{GREEDYDATA:rule_id}"
+
+##Logs that contain the protocol and the service of the destination
+SONIC_2 <%{INT}>id=%{DATA:id} sn=%{DATA:fw_serial_number} time="%{GREEDYDATA}" fw=%{IPORHOST:fw_wan_ip} pri=%{INT:msg_priorityi} c=%{INT:msg_category} m=%{INT:msg_id} msg="%{DATA:event}" n=%{INT:msg_count} src=%{IPORHOST:src_ip}:%{INT:src_port}:%{DATA:from_iface} dst=%{IPORHOST:dst_ip}:%{INT:dst_port}:%{DATA:to_iface} proto=%{DATA:protocol}/%{DATA:service}
+
+##Logs without the X1 on the dst
+SONIC_4 <%{INT}>id=%{DATA:id} sn=%{DATA:fw_serial_number} time="%{GREEDYDATA}" fw=%{IPORHOST:fw_wan_ip} pri=%{INT:msg_priorityi} c=%{INT:msg_category} m=%{INT:msg_id} msg="%{DATA:event}" n=%{INT:msg_count} src=%{IPORHOST:src_ip}:%{INT:src_port}:%{DATA:from_iface} dst=%{IPORHOST:dst_ip}:%{INT:dst_port} proto=%{DATA:protocol}/%{DATA:service}

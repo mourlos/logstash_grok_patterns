@@ -1,0 +1,58 @@
+###THis is a paterns file for DUO-proxy
+
+#New PAM session created
+PAMMESSAGE (%{SSHSESSION}|%{SSHKEYAUTH}|%{PAMDISCONNECT})
+
+#SSH Sessions open / closes 
+SSHSESSION %{GREEDYDATA}: session %{PAMSESSIONSTATE:pam_state} for user %{WORD:pam_user} ?(%{GREEDYDATA})
+PAMSESSIONSTATE opened|closed
+
+
+#Key based authentication
+SSHKEYAUTH Accepted publickey for %{WORD:pam_user} from %{IP:ssh_remote_host} port %{INT} ssh2: %{GREEDYDATA:ssh_key_fingerprint}
+
+
+#DUO - DIfferent conditions for different messages
+SENDING_AD %{DUO_ACTION:action}%{DATA:duo_authreq} for '%{DATA:user}' to '%{IP:destination}'
+SENDING_REQUEST %{DUO_ACTION:action} from %{IP:src} to %{GREEDYDATA:dest}
+RECIEVED_NEW new request id %{INT:request_id} from \('%{IP:src}', %{WORD:src_port}\)
+LOGIN_ATTEMPT \(\('%{IP:src_ip}', %{WORD:src_port}\), %{WORD}\): %{DATA:duo_authreq} for username u'%{DATA:user}'
+STARTING \[%{DUO_ACTION:action} \(%{WORD:protocol}\)\] %{DATA:data} \<%{GREEDYDATA:word}\> 
+DUO_ACTION Sending|Recieved|Starting
+
+####These patterns apply to most of the messages that macth the condition:
+###[syslog_program] == "Authproxy" 
+####If there is a message that is not parsed, please add the pattern below
+
+###This is what is actually called from the conf file
+DUO_LOG %{SENDING_RESPONSE}|%{STOPPING_FACTORY}|%{DUO_ALLOW}|%{ACCESS_ACCEPT}|%{LOGIN_ATTEMPT}|%{PRE_AUTH}|%{AD_POST}|%{POST_TO}|%{STARTING_FACTORY}|%{STOPPING_AD_FACTORY}|%{STARTING_AD_FACTORY}|%{SEND_REQUEST}|%{RECEI_REQUEST}|%{SEND_AD_REQUEST}|%{PRE_AUTH}
+##Multiple actions on the logs
+DUO_ACTION Stopping factory|Starting factory|Sending AD authentication request|Received new request|Sending request
+##The server receives a response
+SENDING_RESPONSE \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): %{GREEDYDATA:duo_message}
+###
+STOPPING_FACTORY \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] %{DUO_ACTION:action} <_%{DATA:factory}: %{GREEDYDATA:API}>
+###Allows the connection
+DUO_ALLOW \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): Duo authentication returned '%{WORD:action}': '%{GREEDYDATA:duo_message}...'
+###Accepts the request for access
+ACCESS_ACCEPT \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): Returning response code %{INT:response_code}: %{GREEDYDATA:duo_message}
+###A login attempt from a user
+LOGIN_ATTEMPT \[%{WORD:what} \(%{WORD:protocol}\)\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): login attempt for username u'%{DATA:user}'
+###Pre-authentication of a user
+PRE_AUTH \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): Got preauth result for: u'%{DATA:user}'
+##AD POST to the server
+AD_POST \[%{WORD:what},%{WORD}\] http %{WORD:method} to %{GREEDYDATA:post_to}
+##HTTP POST
+POST_TO \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] http %{WORD:method} to %{GREEDYDATA:post_to}
+###
+STARTING_FACTORY \[%{WORD:what} \(%{WORD:protocol}\)\] %{DUO_ACTION:action} <%{GREEDYDATA:factory} object at %{GREEDYDATA:API}>
+STOPPING_AD_FACTORY \[%{WORD:what},%{WORD}\] %{DUO_ACTION} <%{GREEDYDATA:factory} object at %{GREEDYDATA:API}>
+STARTING_AD_FACTORY \[%{WORD:what},%{WORD}\] %{DUO_ACTION} <%{GREEDYDATA:factory}: %{GREEDYDATA:API}>
+####
+SEND_REQUEST \[%{WORD:what} \(%{WORD:protocol}\)\] %{DUO_ACTION:action} from %{IPORHOST:src_ip} to %{GREEDYDATA:dst_ip}
+RECEI_REQUEST \[%{WORD:what} \(%{WORD:protocol}\)\] %{DUO_ACTION:action} id %{INT:request_id} from \('%{IPORHOST:src_ip}', %{INT:src_port}\)
+####
+SEND_AD_REQUEST \[%{WORD:what} \(%{WORD:protocol}\)\] %{DUO_ACTION:action} for '%{DATA:user}' to '%{IPORHOST:dst_ip}'
+####
+PRE_AUTH \[%{WORD:what} \(%{WORD:protocol}\),%{WORD}\] \(\('%{IPORHOST:src_ip}', %{INT:src_port}\), %{INT:request_id}\): Got preauth result for: u'%{DATA:user}'
+

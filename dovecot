@@ -1,0 +1,6 @@
+## These patterns are used for logs coming from the dovecot service
+## but the apply to specific events
+
+LOGIN %{DATA:service}: %{DATA:event}: user=<%{DATA:user}>, method=%{DATA:method}, rip=%{IPORHOST:src_ip}, lip=%{DATA:dst_ip}, mpid=%{DATA:pid}, %{DATA:encryption_protocol}, session=<%{DATA:session}>
+
+ABORTED %{DATA:service}: %{DATA:event}: user=<%{DATA:user}>, rip=%{IPORHOST:src_ip}, lip=%{DATA:dst_ip}, %{DATA:encryption_protocol}: %{DATA:state}, session=<%{DATA:session}>

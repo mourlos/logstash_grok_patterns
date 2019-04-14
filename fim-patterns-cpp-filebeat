@@ -1,0 +1,9 @@
+##Patterns used to parser logs coming from /var/ossec/logs/alerts/alerts.log
+##PAtern called from the filter
+ALERTS %{ALERT_3}|%{ALERT_1}|%{ALERT_2}
+##Type of alert
+ALERT_2 (?m)\*\* Alert %{DATA:timestamp_seconds}:%{SPACE}%{WORD}?%{SPACE}\- %{DATA:ossec_group}\n%{YEAR} %{SYSLOGTIMESTAMP:syslog_timestamp} %{DATA:src_host}\-\>%{DATA:fim_message}\nRule: %{NONNEGINT:rule_number} \(level %{NONNEGINT:severity}\) \-\> '%{DATA:signature}'\n(?m)(Src IP: %{IP:src_ip}%{SPACE})?(Src Port: %{NONNEGINT:src_port}%{SPACE})?(Dst IP: %{IP:dst_ip}%{SPACE})?(Dst Port: %{NONNEGINT:dst_port}%{SPACE})?(User: %{USER:src_user}%{SPACE})?%{GREEDYDATA:fim_message}
+##Differnt type of alert
+ALERT_1 (?m)\*\* Alert %{DATA:timestamp_seconds}:%{SPACE}%{WORD}?%{SPACE}\- %{DATA:ossec_group}\n%{YEAR} %{SYSLOGTIMESTAMP:syslog_timestamp} \(%{DATA:src_host}\) %{IP:coming_from}\-\>%{DATA:fim_message}\nRule: %{NONNEGINT:rule_number} \(level %{NONNEGINT:severity}\) \-\> '%{DATA:signature}'\n(?m)(Src IP: %{IP:src_ip}%{SPACE})?(Src Port: %{NONNEGINT:src_port}%{SPACE})?(Dst IP: %{IP:dst_ip}%{SPACE})?(Dst Port: %{NONNEGINT:dst_port}%{SPACE})?(User: %{USER:src_user}%{SPACE})?%{GREEDYDATA:fim_message}
+ALERT_3 (?m)\*\* Alert %{DATA:timestamp_seconds}:%{SPACE}%{WORD}?%{SPACE}\- %{DATA:ossec_group}\n%{YEAR} %{SYSLOGTIMESTAMP:syslog_timestamp} %{DATA:src_host}\-\>%{DATA:fim_message}\nRule: %{NONNEGINT:rule_number} \(level %{NONNEGINT:severity}\) \-\> '%{DATA:signature}'\n%{DATA:event}: '%{DATA:checksum_changed}'\nOld md5sum was: '%{DATA:old_md5}'\nNew md5sum is : '%{DATA:new_md5}'\nOld sha1sum was: '%{DATA:old_sha1}'\nNew sha1sum is : '%{DATA:new_sha1}'
+
